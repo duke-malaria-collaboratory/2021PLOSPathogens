@@ -1,0 +1,279 @@
+---
+title: "Fig2 and fig3"
+author: "Jens Petersen"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+fig_width: 3
+fig_height: 2
+---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE,fig.path = 'Figs/')
+```
+
+
+```{r echo=FALSE, message=FALSE}
+grDevices::pdf.options(useDingbats = FALSE)
+knitr::opts_chunk$set(fig.width=3, fig.height=2) 
+library(dplyr)
+library(ggplot2)
+library(drc)
+library(forcats)
+library(ggsignif)
+```
+
+
+
+## This script runs a summary of all petri dish spot assays.
+
+
+```{r}
+BindingAssays=read.csv("Data/Fig2and3BindingAssays.csv")
+```
+
+Each row represents the date which the parasites were purified and added to the petri dish. Each experiment was performed in duplicate petri dishes with mixed hemoglobin genotypes on each of petri dish. Each petri dish contained 16 protein spots. 3 images was taken at 10x for each protein spot.
+
+Normalized to binding at 10µg/ml being max with CD36 for 3d7 and IT4var30 and EPCR for IT4var20.
+
+Wilcoxon tests:
+```{r}
+wilcox.test(BindingAssays$Count[BindingAssays$Parasite=="3d7"&BindingAssays$Concentration==10&BindingAssays$Receptor=="CD36"&BindingAssays$Genotype=="AS"],BindingAssays$Count[BindingAssays$Parasite=="3d7"&BindingAssays$Concentration=="10"&BindingAssays$Receptor=="CD36"&BindingAssays$Genotype=="AA"],paired=T)
+
+wilcox.test(BindingAssays$Count[BindingAssays$Parasite=="IT4var30"&BindingAssays$Concentration==10&BindingAssays$Receptor=="CD36"&BindingAssays$Genotype=="AS"],BindingAssays$Count[BindingAssays$Parasite=="IT4var30"&BindingAssays$Concentration=="10"&BindingAssays$Receptor=="CD36"&BindingAssays$Genotype=="AA"],paired=T)
+
+wilcox.test(BindingAssays$Count[BindingAssays$Parasite=="IT4var20"&BindingAssays$Concentration==10&BindingAssays$Receptor=="EPCR"&BindingAssays$Genotype=="AS"],BindingAssays$Count[BindingAssays$Parasite=="IT4var20"&BindingAssays$Concentration=="10"&BindingAssays$Receptor=="EPCR"&BindingAssays$Genotype=="AA"],paired=T)
+```
+
+```{r, echo=F,warning=F,message=F, fig.width=1.6, fig.height=2, useDingbats=FALSE}
+p1<-ggplot(subset(BindingAssays,BindingAssays$Concentration==10&BindingAssays$Parasite=="3d7"),aes(x=Receptor,y=Count,fill=Genotype,alpha=0.9))+
+  geom_boxplot()+
+ geom_jitter(aes(color=Genotype), position = position_jitterdodge())+theme_bw()+ylab("Cells per image")+
+  scale_alpha(guide=F)+
+  scale_fill_manual(values=c("#C84E00", "#339898"),guide=guide_legend(override.aes = list(alpha = 0.6)))+
+  scale_color_manual(values=c("#C84E00", "#339898"),guide=guide_legend(override.aes = list(alpha = 0.6)))+
+   theme(legend.title=element_blank(),legend.justification = c(1, 1), legend.position = c(0.98,0.98),legend.background = element_rect(),legend.key.size = unit(0.05, "inch"),legend.key.width=unit(0.1, "inch"))+
+  coord_cartesian(ylim=c(0,3000))
+
+s <- data.frame(stringsAsFactors=FALSE,
+                             p.adj = 0.0001,signif = "AA CD36 - AS CD36",y_position = c(3000),xmin = c(0.8),xmax = c(1.2),Genotype = as.factor(c("AA", "AS")))
+```
+
+
+```{r, echo=F,warning=F,message=F, fig.width=3, fig.height=4, useDingbats=FALSE}
+p2<-ggplot(subset(BindingAssays,BindingAssays$Concentration==10&BindingAssays$Parasite=="IT4var30"),aes(x=Receptor,y=Count,fill=Genotype,alpha=0.9))+geom_boxplot()+geom_jitter(aes(color=Genotype), position = position_jitterdodge())+theme_bw()+ylab("Cells per image")+
+  scale_alpha(guide=F)+scale_shape_manual(values = c(16))+
+  scale_fill_manual(values=c("#C84E00", "#339898"),guide=guide_legend(override.aes = list(alpha = 0.6)))+
+  scale_color_manual(values=c("#C84E00", "#339898"),guide=guide_legend(override.aes = list(alpha = 0.6)))+
+   theme(legend.title=element_blank(),legend.justification = c(1, 1), legend.position = c(0.98,0.98),legend.background = element_rect(),legend.key.size = unit(0.05, "inch"),legend.key.width=unit(0.1, "inch"))+
+  coord_cartesian(ylim=c(0,3000))
+
+s30 <- data.frame(stringsAsFactors=FALSE,
+                             p.adj = 0.03,signif = "AA CD36 - AS CD36",y_position = c(2800),xmin = c(0.8),xmax = c(1.2),Genotype = as.factor(c("AA", "AS")))
+```
+
+```{r, echo=F,warning=F,message=F, fig.width=1.6, fig.height=2, useDingbats=FALSE}
+p3<-ggplot(subset(BindingAssays,BindingAssays$Concentration==10&BindingAssays$Parasite=="IT4var20"),aes(x=fct_rev(as.factor(Receptor)),y=Count,fill=Genotype,alpha=0.9))+geom_boxplot()+geom_jitter(aes(color=Genotype), position = position_jitterdodge())+theme_bw()+ylab("Cells per image")+xlab("Receptor")+
+  scale_alpha(guide=F)+
+  scale_fill_manual(values=c("#C84E00", "#339898"),guide=guide_legend(override.aes = list(alpha = 0.6)))+
+   scale_color_manual(values=c("#C84E00", "#339898"),guide=guide_legend(override.aes = list(alpha = 0.6)))+
+   theme(legend.title=element_blank(),legend.justification = c(1, 1), legend.position = c(0.98,0.98),legend.background = element_rect(),legend.key.size = unit(0.05, "inch"),legend.key.width=unit(0.1, "inch"))+coord_cartesian(ylim=c(0,5000))
+
+s20 <- data.frame(stringsAsFactors=FALSE,
+                             p.adj = c(0.0002),signif = "AA EPCR - AS EPCR",y_position = c(5000),xmin = c(0.8),xmax = c(1.2),Genotype =c("AA", "AS"))
+```
+
+```{r, echo=F,warning=F,message=F, fig.width=1.6, fig.height=2, useDingbats=FALSE}
+p1+ geom_signif(
+    aes(xmin = 0.8, xmax = 1.2, y_position = 2500, annotations = "***"),data = s, manual = TRUE, tip_length = 0.01)
+
+p2+ geom_signif(
+    aes(xmin = 0.8, xmax = 1.2, y_position = 2800, annotations = "*"),data = s30, manual = TRUE, tip_length = 0.01)
+
+p3+ geom_signif(
+    aes(xmin = 0.8, xmax = 1.2, y_position = 4600, annotations = "**"),data = s20, manual = TRUE, tip_length = 0.01)
+```
+
+```{r, echo=F,warning=F,message=F}
+Difference20<-subset(BindingAssays,Parasite== 'IT4var20') %>%
+  group_by(DateBinding) %>%
+ mutate("Difference" = Count/mean(Count[Genotype=='AA'&Receptor=="EPCR"&Concentration==10])*100)
+
+Difference3d7<-subset(BindingAssays,Parasite== '3d7') %>%
+  group_by(DateBinding) %>%
+ mutate("Difference" = Count/mean(Count[Genotype=='AA'&Receptor=="CD36"&Concentration==10])*100)
+
+Difference30<-subset(BindingAssays,Parasite== 'IT4var30') %>%
+  group_by() %>%
+   mutate("Difference" = Count/mean(Count[Genotype=='AA'&Receptor=="CD36"&Concentration==10])*100)
+```
+
+# Plots with logistical regression added
+```{r, echo=F,warning=F,message=F, fig.width=2.3, fig.height=2}
+#3d7
+datamodelAA<-subset(Difference3d7,Difference30$Receptor!="EPCR"&Genotype=="AA")
+datamodelAS<-subset(Difference3d7,Difference30$Receptor!="EPCR"&Genotype=="AS")
+plotdata<-Difference3d7
+plotdata$Receptor[plotdata$Receptor=="Control"]<-plotdata$Receptor[plotdata$Receptor=="CD36"]
+
+
+modelAA <- drm(Difference~Concentration, 
+              fct=LL.4(names=c("Slope", "Lower", "Upper", "ED50")),data=datamodelAA)
+modelAS <- drm(Difference~Concentration, 
+              fct=LL.4(names=c("Slope", "Lower", "Upper", "ED50")),data=datamodelAS)
+var3d7modelAA<-modelAA
+var3d7modelAS<-modelAS
+
+pred.fits <- expand.grid(conc=seq(0.1,11,length=100))
+pm<-predict(modelAA,newdata=pred.fits,interval = "confidence")
+    pred.fits$p <- pm[,1]
+    pred.fits$pmin <- pm[,2]
+    pred.fits$pmax <- pm[,3]
+pred.fits_1 <- data.frame(Genotype = "AA", pred.fits) 
+
+pm<-predict(modelAS,newdata=pred.fits,interval = "confidence")
+    pred.fits$p <- pm[,1]
+    pred.fits$pmin <- pm[,2]
+    pred.fits$pmax <- pm[,3]
+pred.fits_2 <- data.frame(Genotype = "AS", pred.fits)
+pred<-rbind(pred.fits_1,pred.fits_2)
+
+p4<-ggplot(plotdata,aes(x=(Concentration),y=Difference,color=Genotype,alpha=0.9))+
+  geom_point(aes(shape=(Receptor)))+
+  xlab("Protein spot (µg/ml) ")+
+  ylab("Relative binding (%)")+
+  theme_bw() +
+  coord_cartesian(ylim = c(0, 190),xlim=c(0,11))+ scale_y_continuous(breaks = seq(0,180, by=25))+ scale_x_continuous(breaks=c(0,2.5,5,7.5,10))+
+  scale_alpha(guide=F)+
+  scale_shape_manual(name="Receptor",values = c(16,4))+
+  scale_color_manual(values=c("#C84E00", "#339898"))+
+  guides(color = guide_legend(order=1),
+         shape = guide_legend(order=2,reverse=F))+
+  theme(legend.box="vertical", legend.margin=margin(.01,.01,.01,0.01,"cm"),legend.box.margin=margin(0.01),legend.spacing.y = unit(.01, 'cm'),legend.spacing.x = unit(.001, 'cm'),legend.title=element_text(size=8),legend.text = element_text(size=8))
+
+p4 +
+  geom_line(data=pred, aes(x=conc, y=p,color=Genotype),size=1)
+```
+
+```{r, echo=F,warning=F,message=F, fig.width=2.3, fig.height=2}
+datamodelAA<-subset(Difference30,Difference30$Receptor!="EPCR"&Genotype=="AA")
+datamodelAS<-subset(Difference30,Difference30$Receptor!="EPCR"&Genotype=="AS")
+plotdata<-Difference30
+plotdata$Receptor[plotdata$Receptor=="Control"]<-plotdata$Receptor[plotdata$Receptor=="CD36"]
+
+modelAA <- drm(Difference~Concentration, 
+              fct=LL.4(names=c("Slope", "Lower", "Upper", "ED50")),data=datamodelAA)
+modelAS <- drm(Difference~Concentration, 
+              fct=LL.4(names=c("Slope", "Lower", "Upper", "ED50")),data=datamodelAS)
+
+var30modelAA<-modelAA
+var30modelAS<-modelAS
+
+
+pred.fits <- expand.grid(conc=seq(0.1,12,length=100))
+pm<-predict(modelAA,newdata=pred.fits,interval = "confidence")
+    pred.fits$p <- pm[,1]
+    pred.fits$pmin <- pm[,2]
+    pred.fits$pmax <- pm[,3]
+pred.fits_1 <- data.frame(Genotype = "AA", pred.fits) 
+
+pm<-predict(modelAS,newdata=pred.fits,interval = "confidence")
+    pred.fits$p <- pm[,1]
+    pred.fits$pmin <- pm[,2]
+    pred.fits$pmax <- pm[,3]
+pred.fits_2 <- data.frame(Genotype = "AS", pred.fits)
+pred<-rbind(pred.fits_1,pred.fits_2)
+
+p5<-ggplot(plotdata,aes(x=(Concentration),y=Difference,color=Genotype,alpha=0.9))+
+  geom_point(aes(shape=(Receptor)))+
+  xlab("Protein spot (µg/ml) ")+
+  ylab("Relative binding (%)")+
+  theme_bw() +
+  coord_cartesian(ylim = c(0, 190),xlim=c(0,11))+ scale_y_continuous(breaks = seq(0,180, by=25))+ scale_x_continuous(breaks=c(0,2.5,5,7.5,10))+
+  scale_alpha(guide=F)+
+  scale_shape_manual(name="Receptor",values = c(16,4))+
+  scale_color_manual(values=c("#C84E00", "#339898"))+
+  guides(color = guide_legend(order=1),
+         shape = guide_legend(order=2,reverse=F))+
+ theme(legend.box="vertical", legend.margin=margin(.01,.01,.01,0,"cm"),legend.box.margin=margin(0.01),legend.spacing.y = unit(.01, 'cm'),legend.spacing.x = unit(.001, 'cm'),legend.title=element_text(size=8),legend.text = element_text(size=8))
+
+p5+
+  geom_line(data=pred, aes(x=conc, y=p,color=Genotype),size=1)
+```
+
+```{r, echo=F,warning=F,message=F, fig.width=2.3, fig.height=2}
+datamodelAA<-subset(Difference20,Difference20$Receptor!="CD36"&Genotype=="AA")
+datamodelAS<-subset(Difference20,Difference20$Receptor!="CD36"&Genotype=="AS")
+
+plotdata<-Difference20
+plotdata$Receptor[plotdata$Receptor=="Control"]<-plotdata$Receptor[plotdata$Receptor=="EPCR"]
+plotdata_summary <- plotdata %>% # the names of the new data frame and the data frame to be summarised
+  group_by(Receptor,Genotype,Concentration) %>%   # the grouping variable
+  summarise(mean_difference = mean(Difference),  # calculates the mean of each group
+            sd_difference = sd(Difference), # calculates the standard deviation of each group
+            n_difference = n(),  # calculates the sample size per group
+            SE_difference = sd(Difference)/sqrt(n())) # calculates the standard error of each group
+
+
+modelAA <- drm(Difference~Concentration, 
+              fct=LL.4(names=c("Slope", "Lower", "Upper", "ED50")),data=datamodelAA)
+modelAS <- drm(Difference~Concentration, 
+              fct=LL.4(names=c("Slope", "Lower", "Upper", "ED50")),data=datamodelAS)
+var20modelAA<-modelAA
+var20modelAS<-modelAS
+
+pred.fits <- expand.grid(conc=seq(0.1,10,length=1000))
+pm<-predict(modelAA,newdata=pred.fits,interval = "confidence")
+    pred.fits$p <- pm[,1]
+    pred.fits$pmin <- pm[,2]
+    pred.fits$pmax <- pm[,3]
+pred.fits_1 <- data.frame(Genotype = "AA", pred.fits) 
+
+pm<-predict(modelAS,newdata=pred.fits,interval = "confidence")
+    pred.fits$p <- pm[,1]
+    pred.fits$pmin <- pm[,2]
+    pred.fits$pmax <- pm[,3]
+pred.fits_2 <- data.frame(Genotype = "AS", pred.fits)
+pred<-rbind(pred.fits_1,pred.fits_2)
+
+p6<-ggplot(plotdata,aes(x=(Concentration),color=Genotype,alpha=0.9))+
+  geom_point(aes(shape=Receptor,y=Difference))+
+  xlab("Protein spot (µg/ml) ")+
+  ylab("Relative binding (%)")+
+  theme_bw() +
+  coord_cartesian(ylim = c(0, 190),xlim=c(0,11))+ scale_y_continuous(breaks = seq(0,180, by=25))+ scale_x_continuous(breaks=c(0,2.5,5,7.5,10))+
+  scale_alpha(guide=F)+
+  scale_shape_manual(name="Receptor",values = c(4,16))+
+  scale_color_manual(values=c("#C84E00", "#339898"))+
+  guides(color = guide_legend(order=1),
+         shape = guide_legend(order=2,reverse=T))+
+ theme(legend.box="vertical", legend.margin=margin(.01,.01,.01,0,"cm"),legend.box.margin=margin(0.01),legend.spacing.y = unit(.01, 'cm'),legend.spacing.x = unit(.001, 'cm'),legend.title=element_text(size=8),legend.text = element_text(size=8))
+
+p6+geom_line(data=pred, aes(x=conc, y=p,color=Genotype),size=1)
+```
+
+```{r}
+#3d7AA
+print("3D7 model AA")
+summary(var3d7modelAA)
+#3d7AS
+print("3D7 model AS")
+summary(var3d7modelAS)
+
+```
+
+```{r}
+#IT4var30AA
+print("IT4var30 model AA")
+summary(var30modelAA)
+#IT4var30AS
+print("IT4var30 model AS")
+summary(var30modelAS)
+```
+
+```{r}
+#IT4var20AA
+print("IT4var20 model AA")
+summary(var20modelAA)
+#IT4var20AS
+print("IT4var20 model AS")
+summary(var20modelAS)
+```

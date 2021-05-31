@@ -1,0 +1,80 @@
+
+---
+title: "Fig4B"
+author: "Jens Petersen"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+fig_width: 3
+fig_height: 2
+---
+
+```{r, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(fig.width=3, fig.height=2) 
+library("flowCore")
+library("flowViz")
+library("flowUtils")
+library("flowStats")
+library("ggcyto")
+library("ggridges")
+library("kableExtra")
+library("tinytex")
+library(dplyr)
+
+```
+
+
+```{r}
+fclist<-c("Data/hRBC_Tube_001_001.fcs",
+          "Data/hRBC_Tube_002_002.fcs",
+          "Data/hRBC_Tube_003_003.fcs",
+          "Data/hRBC_Tube_004_004.fcs",
+          "Data/hRBC_Tube_005_005.fcs",
+          "Data/hRBC_Tube_006_006.fcs",
+          "Data/hRBC_Tube_007_007.fcs",
+          "Data/hRBC_Tube_008_008.fcs",
+          "Data/hRBC_Tube_009_009.fcs",
+          "Data/hRBC_Tube_010_010.fcs",
+          "Data/hRBC_Tube_011_011.fcs",
+          "Data/hRBC_Tube_012_012.fcs")
+fs <-read.flowSet(fclist, transformation = F,alter.names = F)
+pData(fs)$`Primary Ab` <-c("None","None","None","aCIDR","None","None","None","aCIDR","None","None","None","aCIDR")
+pData(fs)$Secondary <- c("Cells","EtBr","EtBr+APC","EtBr+APC","Cells","EtBr","EtBr+APC","EtBr+APC","Cells","EtBr","EtBr+APC","EtBr+APC")
+pData(fs)$Genotype <- c("HbAA","HbAA","HbAA","HbAA","HbAS","HbAS","HbAS","HbAS","HbAC","HbAC","HbAC","HbAC")
+```
+
+Gates
+```{r}
+rectGate <- rectangleGate(filterId = "FSC+", "FSC-A" = c(30000,100000))
+EtBrGate <- rectangleGate(filterId = "EtBr+", "2-A" = c(500,500000))
+APCgate <- rectangleGate(filterId = "APC+", "APC-A" = c(1,20000))
+```
+
+```{r}
+PositiveGate <-  rectGate
+EtBrPositive<- EtBrGate
+EtBrAPCgate<- EtBrGate & APCgate
+```
+
+Apply gates
+```{r}
+PosTFS <- Subset(fs, PositiveGate)
+PosEtBr <-Subset(fs, EtBrPositive)
+EtBrAPC<-Subset(fs, EtBrAPCgate)
+```
+
+```{r, fig.width=3, fig.height=2}
+
+myorder <- c("HbAC", "HbAS", "HbAA")
+ggplot(EtBrAPC[c(4,8,12)], aes(x = `APC-A`, fill = Genotype))+
+  geom_density_ridges(aes(y=factor(Genotype,level = myorder)),
+                      bandwidth=10,
+                      alpha = 0.9,quantile_lines=T,quantiles=2,)+
+  scale_y_discrete(expand = expansion(mult = c(.1,1))) +
+  scale_x_flowjo_biexp()+theme_bw() + guides(fill=FALSE)+
+  labs(y="Genotype",x="PfEMP1 fluorescence intensity")+
+  scale_fill_manual(values=c("#C84E00","#A1B70D","#339898"))
+
+```
+
+

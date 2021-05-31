@@ -1,0 +1,230 @@
+---
+title: "Fig5C,D,E, S2 Fig"
+output: html_document
+---
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE,fig.path = 'Figs/')
+```
+
+
+```{r echo=FALSE, message=FALSE}
+grDevices::pdf.options(useDingbats = FALSE)
+knitr::opts_chunk$set(fig.width=6, fig.height=2.5) 
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(arsenal)
+```
+Read in data
+```{r}
+NTSSUM<-read.csv("Data/S2FIG_NTS.csv")
+DBLSUM<-read.csv("Data/Fig5_DBLa.csv")
+CIDRsum<-read.csv("Data/Fig5_CIDRa.csv")
+```
+
+```{r, fig.width=6, fig.height=2.5, echo=F}
+
+pn2<-ggplot(NTSSUM,aes(x=Sample,y=CountN,fill=factor(NTStype, levels=c("B","pam", "A"))))+
+  geom_bar(position="fill",stat="identity")+ylab("Proportion")+xlab("Patient sample")+
+  guides(fill=guide_legend(title="NTS"))+theme_classic()+
+  scale_fill_brewer(palette="Set2")+theme(axis.text.x=element_text(angle=(90), vjust = 0.3))
+
+```
+
+```{r, fig.width=6, fig.height=2.5, echo=F}
+
+pd2<-ggplot(DBLSUM,aes(x=Sample,y=CountN,fill=factor(DBLatype, levels=c( "DBLa0","DBLpam", "DBLa1","DBLa2"))))+
+  geom_bar(position="fill", stat="identity")+ylab("Proportion")+xlab("Patient sample")+
+  guides(fill=guide_legend(title="DBL\u03b1"))+theme_classic()+
+  scale_fill_brewer(palette="Set2",labels=c("0","pam","1","2"))+theme(axis.text.x=element_text(angle=(90), vjust = 0.3))
+
+```
+
+```{r,echo=F, fig.width=6, fig.height=2.5}
+pc2<-ggplot(CIDRsum,aes(x=Sample,y=CountN,fill=factor(CIDRatype, levels=c( "CIDRa2-6", "CIDRpam","CIDRa1","CIDRa1.1/8"))))+geom_bar(position="fill",stat="identity")+
+  ylab("Proportion")+
+  guides(fill=guide_legend(title="CIDR\u03b1"))+theme_classic()+xlab("Patient sample")+
+  scale_fill_brewer(palette="Set2",labels=c("2-6","pam","1","1.1/8"))+theme(axis.text.x=element_text(angle=(90), vjust = 0.3))
+
+```
+
+
+```{r, echo=F,fig.width=4.8, fig.height=2}
+pn2+theme()
+pd2+theme()
+pc2+theme()
+```
+
+
+#NTS test
+```{r, echo=FALSE}
+t.test(NTSSUM$CountN[NTSSUM$Genotype=="AA"],
+       NTSSUM$CountN[NTSSUM$Genotype=="AS"])
+t.test(NTSSUM$CountN[NTSSUM$Genotype=="AA"&NTSSUM$NTStype=="A"],
+       NTSSUM$CountN[NTSSUM$Genotype=="AS"&NTSSUM$NTStype=="A"])
+t.test(NTSSUM$CountN[NTSSUM$Genotype=="AA"&NTSSUM$NTStype=="A"],
+       NTSSUM$CountN[NTSSUM$Genotype=="AA"&NTSSUM$NTStype=="B"])
+
+
+t.test(NTSSUM$CountN[NTSSUM$Genotype=="AA"&NTSSUM$NTStype=="B"],
+       NTSSUM$CountN[NTSSUM$Genotype=="AS"&NTSSUM$NTStype=="B"])
+
+t.test(NTSSUM$CountN[NTSSUM$Genotype=="AA"&NTSSUM$NTStype=="pam"],
+       NTSSUM$CountN[NTSSUM$Genotype=="AS"&NTSSUM$NTStype=="pam"])
+```
+#DBL tests
+```{r}
+t.test(DBLSUM$CountN[DBLSUM$Genotype=="AA"],
+       DBLSUM$CountN[DBLSUM$Genotype=="AS"])
+t.test(DBLSUM$CountN[DBLSUM$Genotype=="AA"&DBLSUM$DBLatype=="DBLa0"],
+       DBLSUM$CountN[DBLSUM$Genotype=="AS"&DBLSUM$DBLatype=="DBLa0"])
+t.test(DBLSUM$CountN[DBLSUM$Genotype=="AA"&DBLSUM$DBLatype=="DBLa0"],
+       DBLSUM$CountN[DBLSUM$Genotype=="AA"&DBLSUM$DBLatype=="DBLa1"])
+
+
+t.test(DBLSUM$CountN[DBLSUM$Genotype=="AA"&DBLSUM$DBLatype=="DBLa1"],
+       DBLSUM$CountN[DBLSUM$Genotype=="AS"&DBLSUM$DBLatype=="DBLa1"])
+
+t.test(DBLSUM$CountN[DBLSUM$Genotype=="AA"&DBLSUM$DBLatype=="DBLa2"],
+       DBLSUM$CountN[DBLSUM$Genotype=="AS"&DBLSUM$DBLatype=="DBLa2"])
+
+t.test(DBLSUM$CountN[DBLSUM$Genotype=="AA"&DBLSUM$DBLatype=="DBLpam"],
+       DBLSUM$CountN[DBLSUM$Genotype=="AS"&DBLSUM$DBLatype=="DBLpam"])
+
+
+```
+#CIDR tests
+```{r}
+t.test(CIDRsum$CountN[CIDRsum$Genotype=="AA"],
+       CIDRsum$CountN[CIDRsum$Genotype=="AS"])
+
+t.test(CIDRsum$CountN[CIDRsum$Genotype=="AA"&CIDRsum$CIDRatype=="CIDRa2-6"],
+       CIDRsum$CountN[CIDRsum$Genotype=="AS"&CIDRsum$CIDRatype=="CIDRa2-6"])
+
+t.test(CIDRsum$CountN[CIDRsum$Genotype=="AA"&CIDRsum$CIDRatype=="CIDRa1.1/8"],
+       CIDRsum$CountN[CIDRsum$Genotype=="AS"&CIDRsum$CIDRatype=="CIDRa1.1/8"])
+t.test(CIDRsum$CountN[CIDRsum$Genotype=="AA"&CIDRsum$CIDRatype=="CIDRa1"],
+       CIDRsum$CountN[CIDRsum$Genotype=="AS"&CIDRsum$CIDRatype=="CIDRa1"])
+
+t.test(CIDRsum$CountN[CIDRsum$Genotype=="AA"&CIDRsum$CIDRatype=="CIDRa1"|
+                       CIDRsum$Genotype=="AA"&CIDRsum$CIDRatype=="CIDRa1.1/8"],  CIDRsum$CountN[CIDRsum$Genotype=="AS"&CIDRsum$CIDRatype=="CIDRa1"|
+                       CIDRsum$Genotype=="AS"&CIDRsum$CIDRatype=="CIDRa1.1/8"])
+
+t.test(CIDRsum$CountN[CIDRsum$Genotype=="AA"&CIDRsum$CIDRatype=="CIDRpam"],
+       CIDRsum$CountN[CIDRsum$Genotype=="AS"&CIDRsum$CIDRatype=="CIDRpam"])
+```
+
+```{r, echo=F,fig.width=3, fig.height=1.8}
+#Set the order of DBL and CIDR as factors
+DBLSUM$DBLa<-factor(DBLSUM$DBLatype, levels=c( "DBLa0","DBLpam", "DBLa1","DBLa2"))
+CIDRsum$CIDRat<-factor(CIDRsum$CIDRatype, levels=c( "CIDRa2-6", "CIDRpam","CIDRa1","CIDRa1.1/8"))
+
+```
+#Rename and combine DBL and CIDR sets into headstructure
+```{r, echo=F,fig.width=3.1, fig.height=1.8}
+DBLhead=DBLSUM%>%
+    dplyr::rename(CountNDBL=CountN,
+         CountDBL=Count)%>%
+  arrange(Sample,DBLa)
+CIDRhead=CIDRsum%>%
+  dplyr::rename(CountNCIDR=CountN,
+         CountCIDR=Count)%>%
+  arrange(Sample,CIDRat)
+  
+headstructure<-bind_cols(DBLhead,CIDRhead)
+headstructure=headstructure%>%
+  unite("Head_structure",DBLatype,CIDRatype,sep="-")%>%
+  mutate(Head_structure=dplyr::recode(Head_structure, "DBLa1-CIDRa1" = "DBLa1-CIDRa1.2-7"))
+headstructure$Head_structure<-factor(headstructure$Head_structure,levels=c("DBLa0-CIDRa2-6","DBLpam-CIDRpam","DBLa1-CIDRa1.2-7","DBLa2-CIDRa1.1/8"))
+
+headstructure%>%
+  ggplot(aes(x=CountNCIDR,y=CountNDBL))+geom_point(aes(fill=Head_structure),size=2,alpha=0.7,shape=21)+
+  theme_bw()+geom_smooth(method=lm)+scale_fill_brewer(palette="Set2")+
+  xlab(label="CIDR count (norm.)")+ylab(label="DBL count (norm.)")+
+  theme(legend.position = "right",legend.margin=ggplot2::margin(-10,-10,-10,2),legend.box.margin = ggplot2::margin(-10,4,-10,-10),legend.key.height=unit(1,"line"))+ labs(fill = "Head structure")
+
+summary(lm(CountNCIDR~CountNDBL,headstructure))
+```
+```{r, echo=F,fig.width=3.1, fig.height=1.8}
+DBLheadSum=DBLhead%>%
+  group_by(Sample)%>%
+  mutate(DBLa=case_when(DBLa=="DBLa0"~"DBLa0&2",DBLa=="DBLa1"~"DBLa1",DBLa=="DBLa2"~"DBLa0&2",DBLa=="DBLpam"~"DBLpam"))%>%
+  mutate(NTStype=case_when(DBLa=="DBLa0&2"~"B",DBLa=="DBLa1"~"A",DBLa=="DBLpam"~"pam"))%>%
+  group_by(Sample,DBLa,NTStype)%>%
+  mutate(CountNDBLsum=sum(CountNDBL))%>%
+   mutate(CountDBLsum=sum(CountDBL))%>%
+  summarise(DBLN=unique(CountNDBLsum),
+            DBL=unique(CountDBLsum))
+NTShead=NTSSUM%>%
+  dplyr::rename(CountNNTS=CountN,
+         CountNTS=Count)%>%
+  arrange(Sample,NTStype)
+
+DBLheadSum%>%
+  left_join(NTShead)%>%
+   mutate(NTSDBL=factor(paste0("NTS",NTStype,"-",DBLa),levels=c("NTSB-DBLa0&2","NTSpam-DBLpam","NTSA-DBLa1")))%>%
+  ggplot(aes(x=DBLN,y=CountNNTS))+geom_point(aes(fill=NTSDBL),size=2,alpha=0.7,shape=21)+
+  theme_bw()+geom_smooth(method=lm)+scale_fill_brewer(palette="Set2")+
+  xlab(label="DBL count (norm.)")+ylab(label="NTS count (norm.)")+
+  theme(legend.position = "right",legend.margin=ggplot2::margin(-10,-10,-10,2),legend.box.margin = ggplot2::margin(-10,4,-10,-10),legend.key.height=unit(1,"line"))+ labs(fill = "NTS-DBL type")
+
+DBLheadSum%>%
+  left_join(NTShead)%>%
+  mutate(NTSDBL=factor(paste0("NTS",NTStype,"-",DBLa),levels=c("NTSB-DBLa0&2","NTSpam-DBLpam","NTSA-DBLa1")))%>%
+  ggplot(aes(x=DBL,y=CountNTS))+geom_point(aes(fill=NTSDBL),size=2,alpha=0.7,shape=21)+
+  theme_bw()+geom_smooth(method=lm)+scale_fill_brewer(palette="Set2")+
+  xlab(label="DBL count")+ylab(label="NTS count")+
+  theme(legend.position = "right",legend.margin=ggplot2::margin(-10,-10,-10,2),legend.box.margin = ggplot2::margin(-10,4,-10,-10),legend.key.height=unit(1,"line"))+ labs(fill = "NTS-DBL type")
+```
+
+
+```{r,results="asis"}
+df1=CIDRsum%>%
+  dplyr::select(CIDRatype,Count,CountN)
+ 
+df2=DBLSUM%>%
+  dplyr::select(DBLatype,Count,CountN)
+
+
+melted2 <- CIDRsum %>%
+  dplyr::select(Sample,Genotype,Count,CIDRatype)%>%
+  spread(CIDRatype, Count)
+melted3 <- DBLSUM %>%
+  dplyr::select(Sample,Count,DBLatype)%>%
+  spread(DBLatype, Count)
+mdfall<-left_join(melted2,melted3,by="Sample")
+```
+
+Test for normality
+```{r}
+shapiro.test(mdfall[,3])
+shapiro.test(mdfall[,4])
+shapiro.test(mdfall[,5])
+shapiro.test(mdfall[,6])
+shapiro.test(mdfall[,7])
+shapiro.test(mdfall[,8])
+shapiro.test(mdfall[,9])
+shapiro.test(mdfall[,10])
+ t.test(mdfall[,3]  ~ Genotype, data = mdfall, paired = TRUE)
+ t.test(mdfall[,4]  ~ Genotype, data = mdfall, paired = TRUE)
+  t.test(mdfall[,5]  ~ Genotype, data = mdfall, paired = TRUE)
+   t.test(mdfall[,6]  ~ Genotype, data = mdfall, paired = TRUE)
+    t.test(mdfall[,7]  ~ Genotype, data = mdfall, paired = TRUE)
+     t.test(mdfall[,8]  ~ Genotype, data = mdfall, paired = TRUE)
+      t.test(mdfall[,9]  ~ Genotype, data = mdfall, paired = TRUE)
+      t.test(mdfall[,10]  ~ Genotype, data = mdfall, paired = TRUE)
+```
+
+Summary table
+```{r,results="asis"}
+
+mdf1 <- mdfall %>%
+mutate(Sample=as.numeric(paste(sub("..","",Sample))))%>%
+  rename(!!paste("CIDR","\u03B1","1.2-7",sep=""):=CIDRa1)%>%
+rename(!!paste("CIDR","\u03B1","1.1/8",sep=""):="CIDRa1.1/8")
+colnames(mdf1)
+table_one <- paired(Genotype ~ `CIDRa1.2-7`+`CIDRa1.1/8`+`CIDRa2-6`+`CIDRpam`+DBLa0+DBLa1+DBLa2+DBLpam ,id=Sample, data = mdf1, control=paired.control(numeric.test="signed.rank",digits = 1)) 
+summary(table_one, title = "Domain raw read counts",pfootnote=T)
+```

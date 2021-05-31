@@ -1,0 +1,59 @@
+---
+title: "Fig4C"
+output: html_document
+fig_width: 3
+
+fig_height: 2
+---
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
+```
+
+```{r}
+knitr::opts_chunk$set(fig.width=3, fig.height=2) 
+
+data<-read.csv2("Data/Fig4C.csv",sep=",",dec=".")
+
+head(data)
+
+```
+
+```{r}
+data_summary <- function(data, varname, groupnames){
+  require(plyr)
+  summary_func <- function(x, col){
+    c(mean = mean(x[[col]], na.rm=TRUE),
+      sd = sd(x[[col]], na.rm=TRUE))
+  }
+  data_sum<-ddply(data, groupnames, .fun=summary_func,
+                  varname)
+  data_sum <- rename(data_sum, c("mean" = varname))
+ return(data_sum)
+}
+```
+
+```{r}
+
+df<-data_summary(subset(data,data$Ab=="Yes"), varname="Median", 
+                    groupnames=c("Genotype"))
+```
+
+
+
+```{r, fig.width=2, fig.height=2}
+myorder <- c("AA", "AS", "AC")
+
+ggplot(df,aes(x=factor(Genotype,level = myorder),y=Median,fill=Genotype))+geom_bar(stat="identity",position=position_dodge())+
+  theme_bw()+guides(fill=F)+
+  scale_fill_manual(values=c("#C84E00","#A1B70D", "#339898"))+
+  labs(y="MFI",x="Genotype")+scale_shape(guide=FALSE)+
+   geom_errorbar(aes(ymin=Median-sd, ymax=Median+sd), width=.2,
+                 position=position_dodge(.9))
+
+
+
+ 
+```
